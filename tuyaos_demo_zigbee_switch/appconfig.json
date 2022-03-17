@@ -1,0 +1,13 @@
+{
+	"firmwareInfo": {
+		"description": "this is a demon project",
+		"module_name":"ZSU",
+		"dev_role":"ROUTER",
+		"chip_id":"EFR32MG21A020F1024",
+		"image_type":"0x1602",
+		"manufacture_id":"0x1002",
+		"model_id":"TS0001",
+		"pid": "0e8mtn7a",
+		"manufacture_name": "_TZ3210_"
+	}
+}
