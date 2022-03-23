@@ -8,7 +8,7 @@ Tuya IoTos Embeded Demo Zigbee SDK Development Course
 
 
 ### [开关 demo 说明](https://registry.code.tuya-inc.top/hardware_developer/tuya-zigbee-sdk-development-course/-/blob/master/docs/3.%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.md)
-### [外设 demo 说明]https://registry.code.tuya-inc.top/hardware_developer/tuya-zigbee-sdk-development-course/-/blob/master/docs/7.HAL%20API%20%E6%8E%A5%E5%8F%A3%E8%AF%B4%E6%98%8E.md
+### [外设 demo 说明](https://registry.code.tuya-inc.top/hardware_developer/tuya-zigbee-sdk-development-course/-/blob/master/docs/7.HAL%20API%20%E6%8E%A5%E5%8F%A3%E8%AF%B4%E6%98%8E.md)
 
 APP：使用涂鸦智能 APP
 
