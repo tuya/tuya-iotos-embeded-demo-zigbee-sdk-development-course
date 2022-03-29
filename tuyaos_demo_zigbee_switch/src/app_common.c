@@ -4,7 +4,7 @@
  * @Email: 
  * @LastEditors: Tuya
  * @Date: 2022-02-18 14:29:54
- * @LastEditTime: 2022-03-16 11:05:18
+ * @LastEditTime: 2022-03-28 09:54:32
  * @Copyright: HANGZHOU TUYA INFORMATION TECHNOLOGY CO.,LTD
  * @Company:  http://www.tuya.com
  * @Description: 
@@ -27,13 +27,11 @@
 #include "tal_attribute_rw.h"
 #include "app_common.h"
 
-
 #define KEY_SCAN_MAX_CNT (250)
 #define PIN_NUM_ERROR (0xFF)
 #define TUYA_FLASH_PAGE_SIZE (8 * 1024UL)
 
 #define gpio_ch_num 1
-
 
 extern TIMER_ID etimer_shande;
 extern TIMER_ID etimer_key_scan;
@@ -46,30 +44,11 @@ extern TIMER_ID etimer_join_end_sync;
 STATIC UINT16_T sg_key_scan_cnt = 0;
 STATIC UINT8_T sg_led_status = 0;
 
+BOOL_T g_user_gpio_init_flag = FALSE;
 
 UINT8_T g_power_on_state = 0;
 UINT16_T g_power_on_bright = 0;
-
-
-BOOL_T g_user_gpio_init_flag = FALSE;
-
 UINT8_T g_relay_onoff_status[gpio_ch_num + 1] = {0};
-
-
-STATIC VOID_T __led_flash_timer_cb(TIMER_ID timer_id, VOID_T *arg)
-{
-    sg_led_status = !sg_led_status;
-
-    if (sg_led_status) {
-
-        tal_gpio_write(LED_GPIO,TUYA_GPIO_LEVEL_LOW);
-
-    } else {
-        tal_gpio_write(LED_GPIO,TUYA_GPIO_LEVEL_HIGH);
-    }
-
-}
-
 
 /**
  * @note __dev_power_on_reset_data

@@ -1,30 +1,28 @@
-/**
-* @file tuya_sdk_callback.c
-* @brief Common process - adapter the flash api
-* @version 0.1
-* @date 2021-10-22
-*
-* @copyright Copyright 2020-2021 Tuya Inc. All Rights Reserved.
-*
-*/
-#include "tuya_tools.h"
+/*
+ * @FileName: your project
+ * @Author: Tuya
+ * @Email:
+ * @LastEditors: Tuya
+ * @Date: 2022-03-07 14:24:24
+ * @LastEditTime: 2022-03-24 14:05:06
+ * @Copyright: HANGZHOU TUYA INFORMATION TECHNOLOGY CO.,LTD
+ * @Company:  http://www.tuya.com
+ * @Description:
+ */
+#include "tal_uart.h"
 #include "tal_log.h"
 #include "tal_gpio.h"
-#include "tal_uart.h"
-#include "tal_flash.h"
-#include "tal_system.h"
-#include "tal_memory.h"
 #include "tal_sw_timer.h"
+#include "tal_system.h"
 #include "tal_time_sync.h"
-#include "tal_data_send.h"
-#include "tal_network_mgr.h"
-#include "tal_zcl_identify.h"
-#include "tal_data_receive.h"
+#include "app_config.h"
+#include "tuya_timer_demo.h"
 #include "tal_attribute_rw.h"
 #include "tal_firmware_cfg.h"
 #include "tal_endpoint_register.h"
-#include "app_config.h"
-#include "tuya_timer_demo.h"
+#include "tal_network_mgr.h"
+#include "tal_zcl_identify.h"
+#include "tal_data_receive.h"
 
 #ifdef ENABLE_TAL_LOG
 
@@ -33,6 +31,7 @@
 extern TIMER_ID etimer_blink_sw;
 extern VOID_T led_ctrl_blink_timer_cb(TIMER_ID timer_id, VOID_T *arg);
 extern OPERATE_RET led_ctrl_proc(VOID_T);
+
 
 #ifndef GET_ARRAY_LEN
 #define GET_ARRAY_LEN(x) (sizeof(x) / sizeof(x[0]))
@@ -157,10 +156,25 @@ STATIC VOID_T __app_router_node_init(VOID_T)
     tal_zg_node_config(&node_config);
 }
 
+
 /**
- * @brief Generally used for peripheral initialization
- * 
- * @return OPERATE_RET 
+ * @brief
+ *
+ * @param str
+ * @return VOID_T
+ */
+VOID_T dev_uart_output(IN CONST CHAR_T *str)
+{
+    tal_uart_write(USER_UART0, str, strlen(str));
+}
+
+
+
+
+/**
+ * @brief Generally used for peripheral initialation
+ *
+ * @return OPERATE_RET
  */
 OPERATE_RET tuya_init_first(VOID_T)
 {
@@ -200,12 +214,12 @@ OPERATE_RET tuya_init_second(VOID_T)
     //creat software timer
     tal_sw_timer_create(led_ctrl_blink_timer_cb, NULL, &etimer_blink_sw);
     led_ctrl_blink_start(1000);
+
     //register zigbee endpoint
     tal_zg_endpoint_register(dev_endpoint_desc, GET_ARRAY_LEN(dev_endpoint_desc));
     TAL_PR_DEBUG("identify init ret:%d", tal_zg_identify_init());
 
     tal_zll_target_rssi_threshold_set(-90);
-
 
     //zigbee node configuration
     __app_router_node_init();
@@ -217,17 +231,18 @@ OPERATE_RET tuya_init_second(VOID_T)
         .join_timeout = 20000,
     };
 
-
     tal_time_sync_period_set(60 * 1000);
 
-    TAL_PR_DEBUG("/*********1.0.0 second init*********/");
+    TAL_PR_DEBUG("/*********second init*********/");
 
     return OPRT_OK;
 }
+
+
 /**
  * @brief Generally used for initialization before manufacturing test
  *
- * @return OPERATE_RET
+ * @return OPERATE_RET 
  */
 OPERATE_RET tuya_init_third(VOID_T)
 {
@@ -235,15 +250,16 @@ OPERATE_RET tuya_init_third(VOID_T)
 
     OPERATE_RET ret;
 
-    ret = led_ctrl_proc();
+    ret =  led_ctrl_proc();
 
     if (ret != OPRT_OK)
     {
-        TAL_PR_DEBUG("light init ERROR");
+        TAL_PR_DEBUG("led init ERROR");
     }
 
     return OPRT_OK;
 }
+
 /**
  * @brief Generally used for initialization after manufacturing test
  *
@@ -254,6 +270,7 @@ OPERATE_RET tuya_init_last(VOID_T)
     UINT8_T version;
 
     tal_uart_deinit(USER_UART0);
+
     TAL_UART_CFG_T uart_cfg = {
         .rx_buffer_size = 256,
         .open_mode = 0,
@@ -276,12 +293,19 @@ OPERATE_RET tuya_init_last(VOID_T)
     TAL_PR_DEBUG("/*********last init %d*********/", version);
     return OPRT_OK;
 }
+
+
 /**
  * @brief user-defined callback interface in main loop.do not block!!!
- * 
- * @return OPERATE_RET 
+ *
+ * @return OPERATE_RET
  */
 OPERATE_RET tuya_main_loop(VOID_T)
 {
     return OPRT_OK;
 }
+
+
+
+
+

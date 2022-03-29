@@ -4,7 +4,7 @@
  * @Email:
  * @LastEditors: Tuya
  * @Date: 2022-03-07 14:24:24
- * @LastEditTime: 2022-03-22 17:24:50
+ * @LastEditTime: 2022-03-29 11:48:36
  * @Copyright: HANGZHOU TUYA INFORMATION TECHNOLOGY CO.,LTD
  * @Company:  http://www.tuya.com
  * @Description:
@@ -19,32 +19,28 @@
 #include "tal_log.h"
 #include "tal_sw_timer.h"
 #include "tal_time_sync.h"
+#include "tal_memory.h"
 
 /***********************************************************
 ************************micro define************************
 ***********************************************************/
 #define adcFreq   10000000    // ADC frequency 10M
-#define adc_ch_num 1
-//#define adc_width 12
+#define adc_ch_num 2
+#define adc_width 12
 
 #define ADC_SAMPLE_TIME_MS 1000
 #define adc_type TUYA_ADC_INNER_SAMPLE_VOL
 
-BOOL_T g_adc_stype = FALSE;
-BOOL_T g_user_adc_init_flag = FALSE;     //STATIC
-
-STATIC ULONG_T sg_sample_time_ms = 0;
+//STATIC ULONG_T sg_sample_time_ms = 0;
 STATIC UCHAR_T sg_adc_channel = 0;
+STATIC TUYA_ADC_BASE_CFG_T sg_adc_init_cfg;
+STATIC BOOL_T g_user_adc_init_flag = FALSE;    //STATIC
 
-STATIC TUYA_ADC_BASE_CFG_T sg_adc_init_cfg;    //
-//STATIC BOOL_T g_user_adc_init_flag = FALSE;    //STATIC
 
 TIMER_ID etimer_adc_sample;
 
-UINT8_T ADC_LIST[] = {10};
-
-//extern OPERATE_RET tkl_adc_mapping_to_gpio(UINT8_T ch_id, UINT8_T unit_num);
-
+UINT8_T ADC_LIST[] = {10,17};
+BOOL_T g_adc_stype = FALSE;
 
 /**
  * @brief
@@ -58,93 +54,64 @@ VOID_T dev_uart_output(IN CONST CHAR_T *str)
 }
 
 
-
-VOID_T adc_ch_num_set(UCHAR_T unit_num)
-{
-    sg_adc_channel = unit_num;
-}
-
-
-
 OPERATE_RET tuya_adc_init(VOID_T)
 {
-    OPERATE_RET v_ret = OPRT_COM_ERROR;
-
-    UINT32_T *adc_data;
-    UINT32_T volt = 0;
-    FLOAT_T temp = 0.0;
-    UINT8_T adc_width = 0;
-
     TUYA_ADC_BASE_CFG_T adc_cfg = {
     .ch_list = ADC_LIST,
     .ch_nums = adc_ch_num,
-    .width = 0,
+    .width = adc_width,
     .type = adc_type,
 };
 
-    //tkl_adc_mapping_to_gpio(1, 10);
-
-    v_ret = tkl_adc_init(ADC_LIST[0], &adc_cfg);
-
-    v_ret = tkl_adc_temperature_get();
-
-    //v_ret = tkl_adc_read_data(ADC_LIST[0], adc_data, sizeof(adc_data));
-
-    if (v_ret != OPRT_OK) {
-       TAL_PR_DEBUG("adc init error!");
-    }
- 
-    volt = tkl_adc_ref_voltage_get();
-    adc_width = tkl_adc_width_get(ADC_LIST[0]);
-    //temp = tkl_adc_temperature_get();
-
-
-    g_user_adc_init_flag = TRUE;
-    g_adc_stype = adc_type;
-    adc_ch_num_set(adc_ch_num);
+    tkl_adc_init(10, &adc_cfg);
+    tkl_adc_init(17, &adc_cfg);
 
     TAL_PR_DEBUG("adc init ok!\n");
-
-    TAL_PR_DEBUG("volt: %d\n", volt);
-    TAL_PR_DEBUG("adc_width: %d\n", adc_width);
-    //TAL_PR_DEBUG("volt: %d\n, temp: %f\n", volt, temp);
-
-    return v_ret;
+    return OPRT_OK;
 }
 
-
 /**
- * @note: light ctrl blink timer callback
+ * @note: adc sample timer callback
  * @param {none}
  * @return: none
  */
-VOID_T adc_timer_cb(TIMER_ID timer_id, VOID_T *arg)
+
+VOID_T adc_sample_cb(TIMER_ID timer_id, VOID_T *arg)
 {
-    //tuya_get_adc_vol();
-    adc_ctrl_sample_start(1000);
-    tal_sw_timer_start(etimer_adc_sample, sg_sample_time_ms, TAL_TIMER_ONCE);
+    OPERATE_RET ret;
 
-}
+    UINT32_T *adc_data;
+    UINT32_T *adc_con_buff;
+    UINT32_T volt = 0;
+    INT32_T temp = 0;
+    UINT8_T sample_width = 0;
 
-OPERATE_RET adc_ctrl_sample_start(ULONG_T sample_time)
-{
-    sg_sample_time_ms = 1000;
-    tal_sw_timer_start(etimer_adc_sample, 10, TAL_TIMER_ONCE);
-    TAL_PR_DEBUG("");
+    //ret = tkl_adc_temperature_get();
 
-    return OPRT_OK;
+    ret = tkl_adc_read_data(10, adc_data, SIZEOF(adc_data));
 
-    OPERATE_RET ret =-1;
-    STATIC UCHAR_T cnt = 0;
-    adc_data_t adc_data;
+    tal_system_memset(&adc_con_buff, 0, SIZEOF(adc_data));
 
-    tal_system_memset(&adc_data, 0, sizeof(adc_data));
-    adc_data.vol = 0;
-    ret = tkl_adc_ref_voltage_get();
-    TAL_PR_DEBUG("adc_data.vol: %d\n", adc_data.vol);
-    // if (ret != OPRT_OK)
-    // {
-    //     TAL_PR_DEBUG("ADC VOL error");
-    // }
-    // cnt++;
+    if (ret != OPRT_OK) {
+       TAL_PR_DEBUG("adc sample failed: %d", ret);
+       //TAL_PR_DEBUG("adc1 sample failed: %d", ret1);
+       TAL_PR_DEBUG("adc_data :%d\n", adc_data);
+
+    }
+    tkl_adc_read_single_channel(10, ADC_LIST[0], adc_con_buff);
+    TAL_PR_DEBUG("adc_con_buff: %d\n", adc_con_buff);
+
+    volt = tkl_adc_ref_voltage_get();
+    sample_width = tkl_adc_width_get(10);
+    //temp = tkl_adc_temperature_get();
+
+    g_user_adc_init_flag = TRUE;
+    g_adc_stype = adc_type;
+
+    TAL_PR_DEBUG("volt: %d\n mv", volt);
+    TAL_PR_DEBUG("sample_width: %d\n", sample_width);
+    //TAL_PR_DEBUG("temp : %d\n", temp);
+    //return ret;
+
+    tal_sw_timer_start(etimer_adc_sample, 5000, TAL_TIMER_ONCE);
 }

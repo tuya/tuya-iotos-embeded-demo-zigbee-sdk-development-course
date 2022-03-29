@@ -4,7 +4,7 @@
  * @Email:
  * @LastEditors: Tuya
  * @Date: 2022-03-07 14:24:24
- * @LastEditTime: 2022-03-24 10:58:43
+ * @LastEditTime: 2022-03-29 11:35:59
  * @Copyright: HANGZHOU TUYA INFORMATION TECHNOLOGY CO.,LTD
  * @Company:  http://www.tuya.com
  * @Description:
@@ -12,25 +12,17 @@
 #include "tal_uart.h"
 #include "tal_log.h"
 #include "tal_system.h"
-#include "tal_sw_timer.h"
-#include "tal_time_sync.h"
-#include "tal_adc.h"
-#include "tkl_adc.h"
+#include "tuya_uart_demo.h"
 #include "app_config.h"
-#include "tuya_adc_demo.h"
-#include "tal_attribute_rw.h"
-#include "tal_firmware_cfg.h"
-#include "tal_endpoint_register.h"
+#include "tal_data_send.h"
 #include "tal_network_mgr.h"
 #include "tal_zcl_identify.h"
 #include "tal_data_receive.h"
+#include "tal_attribute_rw.h"
+#include "tal_firmware_cfg.h"
+#include "tal_endpoint_register.h"
 
-#ifdef ENABLE_TAL_LOG
-
-#endif
-
-extern TIMER_ID etimer_adc_sample;
-extern VOID_T adc_sample_cb(TIMER_ID timer_id, VOID_T *arg);
+#define BUFFER_SIZE 256
 
 #ifndef GET_ARRAY_LEN
 #define GET_ARRAY_LEN(x) (sizeof(x) / sizeof(x[0]))
@@ -139,10 +131,12 @@ TAL_ENDPOINT_T dev_endpoint_desc[] = {
     {1, ZHA_PROFILE_ID, ZG_DEVICE_ID_ON_OFF_LIGHT, SERVER_CLUSTER_NUM, (TAL_CLUSTER_T *)&app_server_cluster_list[0], 0, NULL},
 };
 
+
+
 /**
  * @brief zigbee node init
- *
- * @return VOID_T
+ * 
+ * @return VOID_T 
  */
 STATIC VOID_T __app_router_node_init(VOID_T)
 {
@@ -155,6 +149,32 @@ STATIC VOID_T __app_router_node_init(VOID_T)
     tal_zg_node_config(&node_config);
 }
 
+
+
+/**
+ * @brief
+ *
+ * @param str
+ * @return VOID_T
+ */
+VOID_T dev_uart_output(IN CONST CHAR_T *str)
+{
+    // UINT8_T *v_buff = (UINT8_T *)tkl_system_malloc(strlen(str));
+    // if (v_buff == NULL) {
+    //     return;
+    // }
+
+    // tkl_system_memcpy(v_buff, str, strlen(str));
+    // tal_uart_write(USER_UART0, v_buff, strlen((CHAR_T *)v_buff));
+    // tal_uart_write(USER_UART0, str, strlen(str));
+
+    // tkl_system_free(v_buff);
+    // v_buff = NULL;
+    tal_uart_write(USER_UART0, str, strlen(str));
+
+}
+
+
 /**
  * @brief Generally used for peripheral initialation
  *
@@ -162,44 +182,25 @@ STATIC VOID_T __app_router_node_init(VOID_T)
  */
 OPERATE_RET tuya_init_first(VOID_T)
 {
-    TAL_UART_CFG_T uart_cfg = {
-        .rx_buffer_size = 256,
-        .open_mode = 0,
-        {
-            .baudrate = 115200,
-            .parity = TUYA_UART_PARITY_TYPE_NONE,
-            .databits = TUYA_UART_DATA_LEN_8BIT,
-            .stopbits = TUYA_UART_STOP_LEN_1BIT,
-            .flowctrl = TUYA_UART_FLOWCTRL_NONE,
-        }
-    };
-    tal_uart_init(USER_UART0, &uart_cfg);
-
 #if (ENABLE_TAL_LOG == 1)
     tal_log_create_manage_and_init(TAL_LOG_LEVEL_DEBUG, 128, dev_uart_output);
 #endif
-
+    user_uart_init();
     TAL_PR_DEBUG("/*********first init*********/");
+    TAL_PR_DEBUG("USER_UART0 init success!\n");
+
     return OPRT_OK;
 }
 
-/**
- * @brief Generally used for register zigbee device
- *
- * @return OPERATE_RET
- */
+
 OPERATE_RET tuya_init_second(VOID_T)
 {
     //initialize firmware infomation
     TAL_PR_DEBUG("Application version:%d", FIRMWARE_VER);
 
-    tal_sw_timer_create(adc_sample_cb, NULL, &etimer_adc_sample);
-
     //register zigbee endpoint
     tal_zg_endpoint_register(dev_endpoint_desc, GET_ARRAY_LEN(dev_endpoint_desc));
     TAL_PR_DEBUG("identify init ret:%d", tal_zg_identify_init());
-
-    tal_zll_target_rssi_threshold_set(-90);
 
     //zigbee node configuration
     __app_router_node_init();
@@ -212,31 +213,24 @@ OPERATE_RET tuya_init_second(VOID_T)
     };
 
     tal_time_sync_period_set(60 * 1000);
-    tal_sw_timer_start(etimer_adc_sample, 5000, TAL_TIMER_ONCE);
+
+    user_uart_task();
 
     TAL_PR_DEBUG("/*********second init*********/");
 
     return OPRT_OK;
+
 }
 
 
 /**
  * @brief Generally used for initialization before manufacturing test
  *
- * @return OPERATE_RET 
+ * @return OPERATE_RET
  */
 OPERATE_RET tuya_init_third(VOID_T)
 {
     TAL_PR_DEBUG("/*********third init*********/");
-
-    OPERATE_RET ret;
-
-    ret =  tuya_adc_init();
-
-    if (ret != OPRT_OK)
-    {
-        TAL_PR_DEBUG("adc init ERROR");
-    }
 
     return OPRT_OK;
 }

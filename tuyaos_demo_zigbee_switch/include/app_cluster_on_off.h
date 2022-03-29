@@ -4,7 +4,7 @@
  * @Email:
  * @LastEditors: Tuya
  * @Date: 2022-02-18 14:36:43
- * @LastEditTime: 2022-03-14 17:49:07
+ * @LastEditTime: 2022-03-22 17:48:57
  * @Copyright: HANGZHOU TUYA INFORMATION TECHNOLOGY CO.,LTD
  * @Company:  http://www.tuya.com
  * @Description:
@@ -48,7 +48,6 @@ extern "C"
  */
   OPERATE_RET app_level_cluster_handler(UCHAR_T cmd, UINT8_T *payload, UINT8_T payload_len, ZIGBEE_CMD_T cmd_type);
 
-
   /**
  * @note app_onoff_count_down_response
  * @param [in] {ULONG_T} set count down s
@@ -90,8 +89,18 @@ VOID_T app_light_ctrl_power_on_sync_cb(TIMER_ID timer_id, VOID_T *arg);
 
 VOID_T app_light_ctrl_join_end_sync_cb(TIMER_ID timer_id, VOID_T *arg);
 
+  /**
+ * @note: return app_light_count_down_cnt_get
+ * @param [in] none
+ * @return: app_light_count_down_cnt_get
+ */
 ULONG_T app_light_count_down_cnt_get(VOID_T);
 
+  /**
+ * @note: set light count down cnt
+ * @param [in] {ULONG_T}count
+ * @return: none
+ */
 VOID_T app_light_count_down_cnt_set(ULONG_T count);
 
 #ifdef __cplusplus

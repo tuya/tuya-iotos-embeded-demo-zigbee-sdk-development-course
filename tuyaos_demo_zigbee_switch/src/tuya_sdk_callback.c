@@ -8,7 +8,6 @@
 *
 */
 #include "tuya_tools.h"
-
 #include "tal_log.h"
 #include "tal_gpio.h"
 #include "tal_uart.h"
@@ -29,7 +28,6 @@
 #include "tal_reset_factory.h"
 #include "tal_zll_commissioning.h"
 #include "tal_endpoint_register.h"
-
 #include "app_common.h"
 #include "app_config.h"
 #include "app_cluster_on_off.h"
@@ -375,7 +373,6 @@ OPERATE_RET tuya_init_second(VOID_T)
     tal_sw_timer_create(app_light_ctrl_power_on_sync_cb, NULL, &etimer_power_on_sync);
     tal_sw_timer_create(app_light_ctrl_join_end_sync_cb, NULL, &etimer_join_end_sync);
 
-
     //register zigbee endpoint
     tal_zg_endpoint_register(dev_endpoint_desc, GET_ARRAY_LEN(dev_endpoint_desc));
     TAL_PR_DEBUG("identify init ret:%d", tal_zg_identify_init());
@@ -598,7 +595,7 @@ VOID_T tal_zg_scene_recall_callback(UINT8_T ep_id, UINT8_T scene_id, UINT16_T gr
 {
     TAL_PR_DEBUG("scene recall: ep %d, sce %d, gp 0x%02x, type %d", ep_id, scene_id, group_id, data->type);
     UINT8_T onoff;
- 
+
     UINT8_T proc_flag = TRUE;
 
     OPERATE_RET ret = 0;

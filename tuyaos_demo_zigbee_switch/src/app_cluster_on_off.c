@@ -566,10 +566,10 @@ OPERATE_RET app_light_ctrl_proc(VOID_T)
         if (last_switch_status == FALSE)
         {
             ///< light is off
-
         }
         tal_gpio_write(LED_GPIO, TUYA_GPIO_LEVEL_LOW);
     }
+
     last_switch_status = sg_light_ctrl_data.onoff_status;
 
     return OPRT_OK;

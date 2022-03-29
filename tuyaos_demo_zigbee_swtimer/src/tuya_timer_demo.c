@@ -1,47 +1,42 @@
-/**
-* @file app_light_control.c
-* @brief Common process - adapter the flash api
-* @version 0.1
-* @date 2021-10-22
-*
-* @copyright Copyright 2020-2021 Tuya Inc. All Rights Reserved.
-*
-*/
+/*
+ * @FileName: your project
+ * @Author: Tuya
+ * @Email:
+ * @LastEditors: Tuya
+ * @Date: 2022-03-07 14:24:24
+ * @LastEditTime: 2022-03-28 09:56:27
+ * @Copyright: HANGZHOU TUYA INFORMATION TECHNOLOGY CO.,LTD
+ * @Company:  http://www.tuya.com
+ * @Description:
+ */
 
-#include "tal_watchdog.h"
-#include "tuya_timer_demo.h"
-#include "tkl_network_manager.h"
 #include "tal_system.h"
-#include "tal_memory.h"
-#include "tal_log.h"
 #include "tal_gpio.h"
+#include "tuya_timer_demo.h"
+#include "tal_adc.h"
+#include "tkl_adc.h"
 #include "tal_uart.h"
-#include "tal_flash.h"
+#include "tal_log.h"
 #include "tal_sw_timer.h"
-#include "tal_attribute_rw.h"
+#include "tal_time_sync.h"
+#include "tal_memory.h"
 
+/***********************************************************
+************************micro define************************
+***********************************************************/
 
 #define PIN_NUM_ERROR (0xFF)
 #define TUYA_FLASH_PAGE_SIZE (8 * 1024UL)
 #define led_on TUYA_GPIO_LEVEL_LOW
 #define led_off TUYA_GPIO_LEVEL_HIGH
 
-TIMER_ID etimer_blink_sw;
 STATIC led_data_t sg_led_data;
 STATIC ULONG_T sg_blink_time_ms = 0;
 STATIC UINT8_T led_status = led_off;
-BOOL_T g_user_gpio_init_flag = FALSE;
 
-/**
- * @brief
- *
- * @param str
- * @return VOID_T
- */
-VOID_T dev_uart_output(IN CONST CHAR_T *str)
-{
-    tal_uart_write(USER_UART0, str, strlen(str));
-}
+TIMER_ID etimer_blink_sw;
+
+BOOL_T g_user_gpio_init_flag = FALSE;
 
 /**
  * @brief
@@ -117,3 +112,5 @@ OPERATE_RET led_ctrl_blink_start(ULONG_T blink_time)
 
     return OPRT_OK;
 }
+
+

@@ -6,7 +6,7 @@
 #define __APP_CONFIG_H__
 
 /* automatically generated app firmware information! */
-#define FIRMWARE_NAME                   "TIMER"
+#define FIRMWARE_NAME                   "tuyaos_demo_zigbee_uart"
 #define FIRMWARE_VER                    0x40
 #define MANUFACTURER_ID                 0x1002
 #define IMAGE_TYPE                      0x1602

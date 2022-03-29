@@ -1,13 +1,27 @@
-#ifndef __APP_COMMON_H__
-#define __APP_COMMON_H__
+/*
+ * @FileName: your project
+ * @Author: Tuya
+ * @Email: 
+ * @LastEditors: Tuya
+ * @Date: 2022-03-09 10:51:49
+ * @LastEditTime: 2022-03-25 16:03:59
+ * @Copyright: HANGZHOU TUYA INFORMATION TECHNOLOGY CO.,LTD
+ * @Company:  http://www.tuya.com
+ * @Description: 
+ */
+
+
+#ifndef __TAL_UART_DEMO_H__
+#define __TAL_UART_DEMO_H__
+
 
 #ifdef __cplusplus
-extern "C"
-{
+    extern "C" {
 #endif
+
 #include <string.h>
 #include "tkl_uart.h"
-#include "tal_sw_timer.h"
+#include "tal_system.h"
 #include "tuya_cloud_types.h"
 #include "tuya_zigbee_stack.h"
 
@@ -97,14 +111,6 @@ extern "C"
 
 #define PIN_NOEXIST 0xFF ///< default pin def
 
-    typedef struct
-  {
-    UCHAR_T is_warm_start; //
-    UCHAR_T rst_cnt;
-    UCHAR_T padding[2];
-  } rst_info_t;
-
-
   typedef enum{
     REPORT_ZCL_ID_ONOFF = 100,
     REPORT_ZCL_ID_POWER_STATUS,
@@ -118,85 +124,19 @@ extern "C"
   } DEV_WORK_ST_T;
 
 
-  typedef struct
-  {
-    UCHAR_T onoff;
-    UINT16_T bright;
-  } app_data_t;
-
-  typedef struct
-  {
-    UCHAR_T onoff;
-    UCHAR_T mode;
-  } app_all_data_t;
-
-
   typedef enum
   {
     ZIGBEE_CMD_SINGLE = 0,
     ZIGBEE_CMD_GROUP
   } ZIGBEE_CMD_T;
 
-/**
- * enumerate led mode
- */
-typedef enum{
-    LED_MODE_NONE = 0,
-    LED_MODE_RELAY,
-    LED_MODE_POS
-}LED_MODE_T;
-
-
-
-/**
- * @enum Represents the output state of GPIO, OFF represents invalid, and ON represents valid
- */
-typedef enum {
-    DEV_IO_OFF = 0, ///< The output level is not equal to gpio_config_t->drive_flag
-    DEV_IO_ON,      ///< The output level is equal to gpio_config_t->drive_flag
-} DEV_IO_ST_T;
-
-
-//STATIC UCHAR_T sg_light_channel = 0;
   /**************************************************************************
  *                              init functions
  * ************************************************************************/
   /**
- * @berief: light init
- * @param [in] none 
- * @return: OPERATE_RET
- */
-  OPERATE_RET app_light_init(VOID_T);
-
-  /**************************************************************************
- *                          software timer functions
- * ************************************************************************/
-  /**
- * @brief software timer use id enum
- */
-  typedef enum
-  {
-    CLEAR_RESET_CNT_SW_TIMER = 35, ///< basic timer id 35
-    BLINK_SW_TIMER,
-    COUNTDOWN_SW_TIMER,
-    SHADE_TIMER,
-    NETWORK_JOIN_START_DELAY_TIMER,
-  } SW_TIMER_ID_E;
 
 
 
-  /**************************************************************************
- *                        pwm functions
- * ************************************************************************/
-
-  /*
-* @note user button init
-* @param [in] none
-* @return: none
-*/
-  VOID_T app_button_init(VOID_T);
-
-  VOID_T app_button_scan_cb(TIMER_ID timer_id, VOID_T *arg);
 
   /**
 * @brief
@@ -206,31 +146,9 @@ typedef enum {
 */
   VOID_T dev_uart_output(IN CONST CHAR_T *str);
 
-  /*
-* @note user gpio init
-* @param [in] {user_gpio_init_t} gpio_init
-* @return: none
-*/
-  OPERATE_RET app_gpio_init(VOID_T);
-
-  OPERATE_RET app_light_ctrl_proc(VOID_T);
-
-  OPERATE_RET app_light_ctrl_data_switch_set(UINT8_T on_off);
-
-//extern OPERATE_RET app_light_ctrl_blink_start(ULONG_T blink_time);
-// /**
-//  * @brief Set the pwm channel num object
-//  * 
-//  * @param channel_num 
-//  */
-//   VOID_T app_light_ctrl_ch_num_set(UCHAR_T channel_num)
-// {
-//     sg_light_channel = channel_num;
-// }
-
-
-STATIC VOID_T netled_status_task(VOID_T);
-
+OPERATE_RET user_uart_init(VOID_T);
+VOID_T uart_send_str(UCHAR_T *s);
+OPERATE_RET user_uart_task(VOID_T);
 
 /**************************************************************************
  *                          flash functions
@@ -238,9 +156,6 @@ STATIC VOID_T netled_status_task(VOID_T);
 #define RESET_CNT_OFFSET 0
 #define LIGHT_APP_DATA_OFFSET (RESET_CNT_OFFSET + 2)
 #define PROD_TEST_DATA_OFFSET (LIGHT_APP_DATA_OFFSET + sizeof(light_app_data_flash_t) + 1)
-
-  extern UINT8_T g_power_on_state;
-  extern UINT16_T g_power_on_bright;
 
 
   /**
@@ -254,8 +169,10 @@ STATIC VOID_T netled_status_task(VOID_T);
  */
   UCHAR_T app_zcl_get_option_value(ZG_CLUSTER_ID_E cluster, UCHAR_T optionMask, UCHAR_T optionOverride);
 
+
+
 #ifdef __cplusplus
-  extern "C"
-  {
+}
 #endif
+
 #endif

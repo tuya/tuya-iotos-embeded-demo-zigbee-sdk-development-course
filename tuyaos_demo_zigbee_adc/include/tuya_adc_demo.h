@@ -4,7 +4,7 @@
  * @Email: 
  * @LastEditors: Tuya
  * @Date: 2022-03-09 10:51:49
- * @LastEditTime: 2022-03-22 17:18:01
+ * @LastEditTime: 2022-03-24 10:02:14
  * @Copyright: HANGZHOU TUYA INFORMATION TECHNOLOGY CO.,LTD
  * @Company:  http://www.tuya.com
  * @Description: 
@@ -132,7 +132,7 @@
   typedef struct
   {
     UINT32_T vol;
-    FLOAT_T temp;
+    UINT32_T temp;
     UINT8_T width;
   } adc_data_t;
 
@@ -151,14 +151,9 @@
 * @return VOID_T
 */
   VOID_T dev_uart_output(IN CONST CHAR_T *str);
-
-
 OPERATE_RET tuya_adc_init(VOID_T);
-
-VOID_T adc_timer_cb(TIMER_ID timer_id, VOID_T *arg);
+VOID_T adc_sample_cb(TIMER_ID timer_id, VOID_T *arg);
 VOID_T adc_ch_num_set(UCHAR_T channel_num);
-
-OPERATE_RET adc_ctrl_sample_start(ULONG_T sample_time);
 
 /**************************************************************************
  *                          flash functions
